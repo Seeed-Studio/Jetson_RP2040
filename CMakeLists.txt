@@ -6,7 +6,7 @@ include_directories(${PROJECT_SOURCE_DIR}/inc)
 
 pico_sdk_init()
 
-set(SRC_LIST main.c)
+set(SRC_LIST main.c src/jetson.c)
 add_executable(Jetson_RP2040 ${SRC_LIST})
 
 target_link_libraries(Jetson_RP2040
