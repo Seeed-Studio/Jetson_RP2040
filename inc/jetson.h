@@ -13,4 +13,9 @@
 #define PWR_ON_DELAY    1
 
 
+void jetson_init(void);
+void jetson_auto_on(void);
+void jetson_pwr_btn(void);
+
+
 #endif // __JETSON__H__
