@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2022 Seeed technology inc.
+ *
+ * The MIT License (MIT)
+ */
+
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
