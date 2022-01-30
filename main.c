@@ -18,6 +18,7 @@ int main()
     jetson_init();
     jetson_auto_on();
     jetson_pwr_btn();
+    jetson_pwr_detect();
 
     for (;;) {
     }

@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "hardware/adc.h"
 #include "hardware/gpio.h"
 #include "jetson.h"
 
@@ -45,6 +46,11 @@ void jetson_init(void)
     sleep_ms(100);
     gpio_set_irq_enabled_with_callback(SHUTDOWN_REQ, 
         GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
+
+    // adc
+    adc_init();
+    adc_gpio_init(ADC_5V);
+    adc_gpio_init(ADC_3V);
 }
 
 
@@ -73,27 +79,56 @@ bool power_btn_callback(struct repeating_timer *t)
     if (pwr_state)
         return true;
 
-    printf("%09d\r", pwr_btn);
     if (gpio_get(BMCU_POWER_EN)) {
         if (pwr_btn >= PWR_OFF_DELAY) {
             pwr_state = 1;
             gpio_put(BMCU_POWER_EN, 0);
-            printf("\npower off\n");
+            printf("Power off!\n");
         }
     }
     else {
         if (pwr_btn >= PWR_ON_DELAY) {
             pwr_state = 1;
             gpio_put(BMCU_POWER_EN, 1);
-            printf("\npower on\n");
+            printf("Power on!\n");
         }
     }
 
     return true;
 }
 
-struct repeating_timer timer;
+struct repeating_timer timer_btn;
 void jetson_pwr_btn(void)
 {
-    add_repeating_timer_ms(TIMER_DELAY, power_btn_callback, NULL, &timer);
+    add_repeating_timer_ms(TIMER_PWR_BTN, power_btn_callback, NULL, &timer_btn);
+}
+
+
+bool power_detect_callback(struct repeating_timer *t)
+{
+    uint32_t v3, v5;
+
+    adc_select_input(0);
+    v5 = adc_read();
+    v5 *= 3300;
+    v5 /= 4096;
+    adc_select_input(1);
+    v3 = adc_read();
+    v3 *= 3300;
+    v3 /= 4096;
+
+    if (gpio_get(BMCU_POWER_EN)) {
+        if (v5 <= PWR_5V_LOWER) {
+            gpio_put(BMCU_POWER_EN, 0);
+            printf("Low volt off! %d,%d\n", v5, v3);
+        }
+    }
+
+    return true;
+}
+
+struct repeating_timer timer_pwr;
+void jetson_pwr_detect(void)
+{
+    add_repeating_timer_ms(TIMER_PWR_DETECT, power_detect_callback, NULL, &timer_pwr);
 }
