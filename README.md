@@ -20,6 +20,7 @@ make -j4
 
 Step3: Flash
 ```
+openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg
 gdb-multiarch Jetson_RP2040.elf
 (gdb) load
 (gdb) monitor reset init
