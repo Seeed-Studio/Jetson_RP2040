@@ -23,7 +23,6 @@
 void jetson_init(void);
 void jetson_auto_on(void);
 void jetson_pwr_btn(void);
-void jetson_pwr_detect(void);
 
 
 #endif // __JETSON__H__

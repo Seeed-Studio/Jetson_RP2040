@@ -11,7 +11,6 @@ add_executable(Jetson_RP2040 ${SRC_LIST})
 
 target_link_libraries(Jetson_RP2040
 		pico_stdlib
-		hardware_adc
 	)
 
 add_definitions(-DPICO_DEFAULT_UART=1
