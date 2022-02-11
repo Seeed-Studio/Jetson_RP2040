@@ -2,6 +2,9 @@
 #define __JETSON__H__
 
 
+#define JETSON_VER      0x10
+
+
 #define BMCU_PWR_BTN    7   // in
 #define SHUTDOWN_REQ    9   // in
 #define BMCU_ACOK       11  // in
