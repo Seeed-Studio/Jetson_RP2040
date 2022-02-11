@@ -65,7 +65,7 @@ void jetson_auto_on(void)
 
 
 static int pwr_btn = 0;
-static int pwr_state = 0;
+static int pwr_btn_pressed = 0;
 bool power_btn_callback(struct repeating_timer *t)
 {
     if (0 == gpio_get(BMCU_PWR_BTN)) {
@@ -73,22 +73,22 @@ bool power_btn_callback(struct repeating_timer *t)
     }
     else {
         pwr_btn = 0;
-        pwr_state = 0;
+        pwr_btn_pressed = 0;
     }
 
-    if (pwr_state)
+    if (pwr_btn_pressed)
         return true;
 
     if (gpio_get(BMCU_POWER_EN)) {
         if (pwr_btn >= PWR_OFF_DELAY) {
-            pwr_state = 1;
+            pwr_btn_pressed = 1;
             gpio_put(BMCU_POWER_EN, 0);
             printf("Power off!\n");
         }
     }
     else {
         if (pwr_btn >= PWR_ON_DELAY) {
-            pwr_state = 1;
+            pwr_btn_pressed = 1;
             gpio_put(BMCU_POWER_EN, 1);
             printf("Power on!\n");
         }
