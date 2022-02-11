@@ -43,7 +43,7 @@ void jetson_init(void)
     gpio_set_dir(RESET_N, GPIO_IN);
     gpio_pull_up(RESET_N);
 
-    sleep_ms(100);
+    sleep_ms(PWR_STABLE_WAIT);
     gpio_set_irq_enabled_with_callback(SHUTDOWN_REQ, 
         GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
 
