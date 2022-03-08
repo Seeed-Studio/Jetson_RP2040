@@ -13,7 +13,7 @@
 #define ADC_5V          26
 #define ADC_3V          27
 
-#define PWR_STABLE_WAIT 500 // 500ms
+#define PWR_STABLE_WAIT 1000 // 1000ms
 
 #define TIMER_PWR_BTN   50  // 50ms
 #define PWR_OFF_DELAY   (10000/TIMER_PWR_BTN) // 10s
