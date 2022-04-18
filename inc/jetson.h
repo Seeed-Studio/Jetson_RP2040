@@ -2,7 +2,7 @@
 #define __JETSON__H__
 
 
-#define JETSON_VER      0x10
+#define JETSON_VER      0x11
 
 #define SYS_5V_EN       6   // out
 #define BMCU_PWR_BTN    7   // in
