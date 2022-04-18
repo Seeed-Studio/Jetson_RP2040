@@ -18,6 +18,7 @@ int main()
     printf("Build: %s %s\n", __DATE__, __TIME__);
 
     jetson_init();
+	jetson_wait_5v();
     jetson_auto_on();
     jetson_pwr_btn();
 
