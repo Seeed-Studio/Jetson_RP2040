@@ -4,12 +4,13 @@
 
 #define JETSON_VER      0x10
 
-
+#define SYS_5V_EN       6   // out
 #define BMCU_PWR_BTN    7   // in
 #define SHUTDOWN_REQ    9   // in
 #define BMCU_ACOK       11  // in
 #define BMCU_POWER_EN   13  // out
 #define RESET_N         16  // in
+#define BEEPER          17  // out
 #define ADC_5V          26
 #define ADC_3V          27
 
