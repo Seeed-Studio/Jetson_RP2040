@@ -13,8 +13,8 @@
 #define RESET_N         16  // in
 #define BEEPER          17  // out
 
-#define ADC_5V_GPIO     26  // ADC0
-#define ADC_5V_CH       0
+#define ADC_5V_GPIO     29  // ADC3
+#define ADC_5V_CH       3
 #define ADC_3V_GPIO     27	// ADC1 - not used
 #define ADC_3V_CH       1
 #define ADC_12V_GPIO    28	// ADC2
