@@ -23,6 +23,12 @@ int main()
     jetson_pwr_btn();
 
     for (;;) {
+#if 0
+        gpio_put(TEST_POINT, 1);
+        for(int i = 0; i < 500; i++);
+        gpio_put(TEST_POINT, 0);
+        for(int j = 0; j < 500; j++);
+#endif
     }
 
     return 0;

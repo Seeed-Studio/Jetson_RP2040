@@ -85,6 +85,11 @@ void jetson_init(void)
     gpio_disable_pulls(BMCU_POWER_EN);
     gpio_put(BMCU_POWER_EN, 0);
 
+	gpio_init(TEST_POINT);
+    gpio_set_dir(TEST_POINT, GPIO_OUT);
+    gpio_disable_pulls(TEST_POINT);
+    gpio_put(TEST_POINT, 0);
+
     gpio_init(SATA_PwrEN2);
     gpio_set_dir(SATA_PwrEN2, GPIO_OUT);
     gpio_disable_pulls(SATA_PwrEN2);
@@ -197,14 +202,27 @@ static bool power_btn_callback(struct repeating_timer *t)
     return true;
 }
 
-static void gpio_callback(uint gpio, uint32_t events) {
-    if (SHUTDOWN_REQ == gpio) {
-        power_enable(0);
-		DBG_PRINT("SHUTDOWN_REQ 0x%x\n", events);
-    }
-    else {
-        DBG_PRINT("gpio=%d 0x%x\n", gpio, events);
-    }
+static void gpio_callback(uint gpio, uint32_t events)
+{
+    if (SHUTDOWN_REQ == gpio)
+	{
+		for(int i = 0; i < 10; i++);		//delay
+
+		if(0 == gpio_get(SHUTDOWN_REQ))
+		{
+			for(int j = 0; j < 10; j++);	//delay
+
+			if(0 == gpio_get(SHUTDOWN_REQ))
+			{
+				power_enable(0);
+				DBG_PRINT("SHUTDOWN_REQ\n");
+			}
+		}
+	}
+	else
+	{
+		DBG_PRINT("gpio=%d 0x%x\n", gpio, events);
+	}
 }
 
 void jetson_pwr_btn(void)

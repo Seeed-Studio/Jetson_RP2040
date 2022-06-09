@@ -9,6 +9,7 @@
 #define SHUTDOWN_REQ    9   // in
 #define BMCU_ACOK       11  // in
 #define BMCU_POWER_EN   13  // out
+#define TEST_POINT      14  // out
 #define SATA_PwrEN2     15  // out
 #define RESET_N         16  // in
 #define BEEPER          17  // out
@@ -30,7 +31,7 @@
 #define PWR_5V_LOW      1700   // 4.3v
 #define PWR_3V_LOW      1400   // 2.8v
 
-// #define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DBG_PRINT(format, x...)		printf("%s:"format, __func__, ##x)
 #else
