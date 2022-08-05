@@ -85,6 +85,10 @@ void jetson_init(void)
     gpio_disable_pulls(BMCU_POWER_EN);
     gpio_put(BMCU_POWER_EN, 0);
 
+	gpio_init(PWR_1V8_EN);
+    gpio_set_dir(PWR_1V8_EN, GPIO_OUT);
+    gpio_disable_pulls(PWR_1V8_EN);
+
     gpio_init(SATA_PwrEN2);
     gpio_set_dir(SATA_PwrEN2, GPIO_OUT);
     gpio_disable_pulls(SATA_PwrEN2);
@@ -135,26 +139,94 @@ void jetson_wait_5v(void)
 
 	adc_select_input(ADC_5V_CH);
 	val = adc_read();
-	if (val < PWR_5V_LOW) {
+	if (val < PWR_5V_LOW)
+	{
 		add_repeating_timer_ms(100, adc_5v_fault_callback, NULL, &timer);
-		while (1) {
+		while (1)
+		{
 			val = adc_read();
-			if (val >= PWR_5V_LOW) {
+			if (val >= PWR_5V_LOW)
+			{
 				cnt++;
-				if (cnt >= 10) {
+				if (cnt >= 10)
+				{
 					break;
 				}
 			}
-			else {
+			else
+			{
 				cnt = 0;
 			}
+			printf("5v detect raw = %d\n", val);
 			sleep_ms(10);
 		}
 		cancel_repeating_timer(&timer);
 		gpio_put(BEEPER, 0);
 	}
+	printf("5v detect OK raw = %d\n", val);
 }
 
+static bool adc_12v_fault_callback(struct repeating_timer *t)
+{
+	// beeper
+	static uint32_t beeper = 0; // must be static
+
+	beeper++;
+	if (beeper < 15) {
+		gpio_put(BEEPER, !!(beeper&0x01));
+	}
+	else {
+		gpio_put(BEEPER, 0);
+		if (beeper >= 30) {
+			beeper = 0;
+		}
+	}
+
+	return true;
+}
+
+void jetson_wait_12v(void)
+{
+	uint16_t val = 0;
+	uint32_t cnt = 0;
+	static struct repeating_timer timer = { 0 }; // must be static
+
+	adc_select_input(ADC_12V_CH);
+	val = adc_read();
+
+	if (val < PWR_12V_LOW)
+	{
+		add_repeating_timer_ms(100, adc_12v_fault_callback, NULL, &timer);
+		while (1)
+		{
+			val = adc_read();
+			if (val >= PWR_12V_LOW)
+			{
+				cnt++;
+				if (cnt >= 10)
+				{
+//					printf("Enable SATA power supply\n", val);
+//					gpio_put(SATA_PwrEN2, 1);	//enable SATA power supply
+					break;
+				}
+			}
+			else
+			{
+				cnt = 0;
+			}
+
+			printf("12v detect raw = %d\n", val);
+			sleep_ms(10);
+		}
+
+		cancel_repeating_timer(&timer);
+		gpio_put(BEEPER, 0);
+	}
+
+//	printf("Enable SATA power supply, raw = %d\n", val);
+//	gpio_put(SATA_PwrEN2, 1);	//enable SATA power supply
+
+}
 
 void jetson_auto_on(void)
 {
@@ -163,7 +235,6 @@ void jetson_auto_on(void)
         power_enable(1);
     }
 }
-
 
 static bool power_btn_callback(struct repeating_timer *t)
 {
@@ -197,14 +268,39 @@ static bool power_btn_callback(struct repeating_timer *t)
     return true;
 }
 
-static void gpio_callback(uint gpio, uint32_t events) {
-    if (SHUTDOWN_REQ == gpio) {
-        power_enable(0);
-		DBG_PRINT("SHUTDOWN_REQ 0x%x\n", events);
-    }
-    else {
-        DBG_PRINT("gpio=%d 0x%x\n", gpio, events);
-    }
+static void gpio_callback(uint gpio, uint32_t events)
+{
+    if (SHUTDOWN_REQ == gpio)
+	{
+		for(int i = 0; i < 10; i++);		//delay
+
+		if(0 == gpio_get(SHUTDOWN_REQ))
+		{
+			for(int j = 0; j < 10; j++);	//delay
+
+			if(0 == gpio_get(SHUTDOWN_REQ))
+			{
+				power_enable(0);
+				DBG_PRINT("SHUTDOWN_REQ\n");
+			}
+		}
+	}
+	else if(RESET_N == gpio)
+	{
+		for(int i = 0; i < 10; i++);		//delay
+		if(0 == gpio_get(RESET_N))
+		{
+			gpio_put(PWR_1V8_EN, 0);
+		}
+		else
+		{
+			gpio_put(PWR_1V8_EN, 1);
+		}
+	}
+	else
+	{
+		DBG_PRINT("gpio=%d 0x%x\n", gpio, events);
+	}
 }
 
 void jetson_pwr_btn(void)
@@ -212,4 +308,6 @@ void jetson_pwr_btn(void)
     static struct repeating_timer timer; // must be static
     add_repeating_timer_ms(TIMER_PWR_BTN, power_btn_callback, NULL, &timer);
     gpio_set_irq_enabled_with_callback(SHUTDOWN_REQ, GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
+
+	gpio_set_irq_enabled_with_callback(RESET_N, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
 }

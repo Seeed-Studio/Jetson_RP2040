@@ -9,6 +9,13 @@
 #include "hardware/gpio.h"
 #include "jetson.h"
 
+static bool detect_5v_cb(struct repeating_timer *t)
+{
+    printf("detect_5v_cb\n");
+    jetson_wait_5v();
+//    jetson_wait_12v();
+}
+
 int main()
 {
     stdio_init_all();
@@ -19,8 +26,12 @@ int main()
 
     jetson_init();
 	jetson_wait_5v();
+    jetson_wait_12v();
     jetson_auto_on();
     jetson_pwr_btn();
+
+    static struct repeating_timer detect_timer = { 0 }; // must be static
+    add_repeating_timer_ms(1000, detect_5v_cb, NULL, &detect_timer);
 
     for (;;) {
     }
